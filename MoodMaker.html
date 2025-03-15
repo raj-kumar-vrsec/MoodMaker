@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Mood Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-bg: #f0f2f5;
+            --text-color: #2d3436;
+            --card-bg: #ffffff;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--primary-bg);
+            color: var(--text-color);
+            min-height: 100vh;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-top: 2rem;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2d3436;
+            margin-bottom: 2rem;
+            font-weight: 600;
+        }
+
+        .mood-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .mood-btn {
+            background: none;
+            border: 2px solid #e0e0e0;
+            padding: 1.5rem;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .mood-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .mood-emoji {
+            font-size: 2.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .history-section {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: rgba(255,255,255,0.1);
+            border-radius: 15px;
+        }
+
+        .dark-mode {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            background: #2d3436;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        /* Mood-specific styles */
+        .happy { color: #f6b93b; border-color: #f6b93b; }
+        .sad { color: #6c5ce7; border-color: #6c5ce7; }
+        .excited { color: #e55039; border-color: #e55039; }
+        .calm { color: #78e08f; border-color: #78e08f; }
+
+        /* Dark mode */
+        .dark-theme {
+            --primary-bg: #2d3436;
+            --text-color: #f0f2f5;
+            --card-bg: #3b4149;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .mood-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="dark-mode" onclick="toggleDarkMode()">🌓 Toggle Theme</button>
+    
+    <div class="container">
+        <h1>How are you feeling today?</h1>
+        
+        <div class="mood-grid">
+            <button class="mood-btn happy" data-mood="happy" onclick="setMood('happy')">
+                <span class="mood-emoji">😊</span>
+                Happy
+            </button>
+            
+            <button class="mood-btn sad" data-mood="sad" onclick="setMood('sad')">
+                <span class="mood-emoji">😢</span>
+                Sad
+            </button>
+            
+            <button class="mood-btn excited" data-mood="excited" onclick="setMood('excited')">
+                <span class="mood-emoji">🤩</span>
+                Excited
+            </button>
+            
+            <button class="mood-btn calm" data-mood="calm" onclick="setMood('calm')">
+                <span class="mood-emoji">😌</span>
+                Calm
+            </button>
+        </div>
+
+        <div class="history-section">
+            <h2>Mood History</h2>
+            <div id="mood-history"></div>
+        </div>
+    </div>
+
+    <script>
+        const moods = {
+            happy: { color: '#f6b93b', emoji: '😊' },
+            sad: { color: '#6c5ce7', emoji: '😢' },
+            excited: { color: '#e55039', emoji: '🤩' },
+            calm: { color: '#78e08f', emoji: '😌' }
+        }
+
+        let moodHistory = JSON.parse(localStorage.getItem('moodHistory')) || [];
+
+        function setMood(moodType) {
+            const mood = moods[moodType];
+            document.body.style.backgroundColor = mood.color;
+            
+            // Add to history
+            moodHistory.unshift({
+                mood: moodType,
+                emoji: mood.emoji,
+                date: new Date().toLocaleString()
+            });
+            
+            // Keep only last 5 entries
+            moodHistory = moodHistory.slice(0, 5);
+            
+            localStorage.setItem('moodHistory', JSON.stringify(moodHistory));
+            updateHistory();
+        }
+
+        function updateHistory() {
+            const historyDiv = document.getElementById('mood-history');
+            historyDiv.innerHTML = moodHistory.map(entry => `
+                <div class="history-item">
+                    <span style="font-size: 1.2rem">${entry.emoji}</span>
+                    <span>${entry.mood}</span>
+                    <small>${entry.date}</small>
+                </div>
+            `).join('');
+        }
+
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-theme');
+        }
+
+        // Initial history load
+        updateHistory();
+    </script>
+</body>
+</html>
